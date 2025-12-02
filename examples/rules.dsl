@@ -1,22 +1,22 @@
 rule "TooManyParameters" {
-    target: function
+    target: method
     condition: parameter_count > 4
     severity: error
-    message: "Fungsi {name} memiliki {parameter_count} parameter, maksimal 4"
+    message: "Method {name} memiliki {parameter_count} parameter, maksimal 4"
 }
 
 rule "DeepNesting" {
-    target: function
+    target: method
     condition: nesting_level > 3
     severity: warning
-    message: "Nesting terlalu dalam di fungsi {name}"
+    message: "Nesting terlalu dalam di method {name}"
 }
 
 rule "TooManyVariables" {
-    target: function
+    target: method
     condition: local_variable_count > 8
     severity: warning
-    message: "Fungsi {name} memiliki {local_variable_count} variabel, maksimal 8"
+    message: "Method {name} memiliki {local_variable_count} variabel, maksimal 8"
 }
 
 rule "VariableNameTooShort" {
@@ -26,9 +26,9 @@ rule "VariableNameTooShort" {
     message: "Nama variable {name} terlalu pendek, minimal 5 karakter"
 }
 
-rule "TooManyFunctionCalls" {
-    target: function
-    condition: function_call_count > 3
+rule "TooManyMethodCalls" {
+    target: method
+    condition: method_call_count > 3
     severity: warning
-    message: "Fungsi {name} memanggil {function_call_count} fungsi lain, maksimal 3"
+    message: "Method {name} memanggil {method_call_count} method lain, maksimal 3"
 }

@@ -10,8 +10,8 @@ class RuleEvaluator:
     def evaluate_all(self):
         """Evaluate all rules against metrics"""
         for rule in self.rules:
-            if rule.target == 'function':
-                self._evaluate_function_rules(rule)
+            if rule.target == 'method':
+                self._evaluate_method_rules(rule)
             elif rule.target == 'variable':
                 self._evaluate_variable_rules(rule)
             elif rule.target == 'class':
@@ -19,17 +19,17 @@ class RuleEvaluator:
         
         return self.violations
     
-    def _evaluate_function_rules(self, rule):
-        """Evaluate rules for functions"""
-        for func in self.metrics.functions:
-            if self._evaluate_condition(rule.condition, func):
+    def _evaluate_method_rules(self, rule):
+        """Evaluate rules for methods"""
+        for method in self.metrics.methods:
+            if self._evaluate_condition(rule.condition, method):
                 violation = {
                     'rule': rule.name,
                     'severity': rule.severity,
-                    'target': 'function',
-                    'name': func.name,
-                    'line': func.line_number,
-                    'message': self._format_message(rule.message, func)
+                    'target': 'method',
+                    'name': method.name,
+                    'line': method.line_number,
+                    'message': self._format_message(rule.message, method)
                 }
                 self.violations.append(violation)
     

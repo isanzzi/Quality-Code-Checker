@@ -1,5 +1,5 @@
 import javalang
-from models.metrics import FunctionMetrics, VariableMetrics, ClassMetrics, CodeMetrics
+from models.metrics import MethodMetrics, VariableMetrics, ClassMetrics, CodeMetrics
 
 class JavaAnalyzer:
     def __init__(self, code):
@@ -34,10 +34,10 @@ class JavaAnalyzer:
                     self._analyze_field(field)
     
     def _analyze_method(self, method_node):
-        """Analyze a single method/function"""
+        """Analyze a single method"""
         is_public = 'public' in [m for m in method_node.modifiers] if method_node.modifiers else False
         
-        func_metrics = FunctionMetrics(
+        method_metrics = MethodMetrics(
             name=method_node.name,
             line_number=method_node.position.line if method_node.position else 0,
             parameter_count=len(method_node.parameters) if method_node.parameters else 0,
@@ -48,16 +48,16 @@ class JavaAnalyzer:
         # Analyze method body
         if method_node.body:
             body_with_paths = [(None, n) for n in method_node.body]
-            func_metrics.nesting_level = self._calculate_nesting_level(body_with_paths)
+            method_metrics.nesting_level = self._calculate_nesting_level(body_with_paths)
             
             all_nodes = list(method_node.filter(javalang.tree.Node))
             
-            func_metrics.local_variable_count = self._count_local_variables(all_nodes)
-            func_metrics.function_call_count = self._count_function_calls(all_nodes)
-            func_metrics.return_count = self._count_returns(all_nodes)
-            func_metrics.complexity = self._calculate_complexity(all_nodes)
+            method_metrics.local_variable_count = self._count_local_variables(all_nodes)
+            method_metrics.method_call_count = self._count_method_calls(all_nodes)
+            method_metrics.return_count = self._count_returns(all_nodes)
+            method_metrics.complexity = self._calculate_complexity(all_nodes)
         
-        self.metrics.functions.append(func_metrics)
+        self.metrics.methods.append(method_metrics)
     
     def _analyze_field(self, field_node):
         """Analyze class fields (variables)"""
@@ -110,8 +110,8 @@ class JavaAnalyzer:
                 count += len(node.declarators)
         return count
     
-    def _count_function_calls(self, body):
-        """Count function/method calls"""
+    def _count_method_calls(self, body):
+        """Count method invocations"""
         count = 0
         for path, node in body:
             if isinstance(node, javalang.tree.MethodInvocation):
