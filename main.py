@@ -40,9 +40,11 @@ def print_violations(violations):
     print(f"Summary: {len(errors)} Error(s), {len(warnings)} Warning(s), {len(infos)} Info(s)")
     print("=" * 50)
 
-def main():
+def run_cli():
+    """Run in CLI mode"""
     if len(sys.argv) < 3:
         print("Usage: python main.py <dsl_file> <java_file>")
+        print("   or: python main.py --gui")
         sys.exit(1)
     
     dsl_file = sys.argv[1]
@@ -62,6 +64,20 @@ def main():
     print()
     
     print_violations(violations)
+
+def run_gui():
+    """Run in GUI mode"""
+    from gui.main_window import main as gui_main
+    gui_main()
+
+def main():
+    if len(sys.argv) >= 3 and not sys.argv[1].startswith('--'):
+        run_cli()
+    else:
+        print("Starting GUI mode...")
+        print("To use CLI mode: python main.py <dsl_file> <java_file>")
+        print()
+        run_gui()
 
 if __name__ == "__main__":
     main()
