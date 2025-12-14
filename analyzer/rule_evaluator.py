@@ -10,7 +10,7 @@ class RuleEvaluator:
     def evaluate_all(self):
         """Evaluate all rules against metrics"""
         for rule in self.rules:
-            if rule.target == 'method':
+            if rule.target == 'function':
                 self._evaluate_method_rules(rule)
             elif rule.target == 'variable':
                 self._evaluate_variable_rules(rule)
