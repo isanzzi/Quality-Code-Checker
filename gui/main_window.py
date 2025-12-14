@@ -53,7 +53,7 @@ class ToggleSwitch(QCheckBox):
 class AnalysisWorker(QThread):
     """Background worker for code analysis"""
     progress = pyqtSignal(str, int, int)  # file, current, total
-    finished = pyqtSignal(list)  # violations
+    finished = pyqtSignal(list, dict)  # violations, stats (success/failed counts)
     error = pyqtSignal(str)  # error message
     
     def __init__(self, files, rules_file):
@@ -69,6 +69,11 @@ class AnalysisWorker(QThread):
             rules = parse_dsl_file(self.rules_file)
             all_violations = []
             
+            # Track success/failed files
+            success_count = 0
+            failed_count = 0
+            failed_files = []
+            
             # Analyze each file
             for i, file_path in enumerate(self.files):
                 if not self.is_running or self._is_cancelled:
@@ -78,21 +83,42 @@ class AnalysisWorker(QThread):
                 
                 # Check file exists
                 if not os.path.exists(file_path):
+                    failed_count += 1
+                    failed_files.append({"file": file_path, "error": "File not found"})
                     continue
                 
-                # Analyze file
-                metrics = analyze_java_file(file_path)
-                evaluator = RuleEvaluator(rules, metrics)
-                violations = evaluator.evaluate_all()
-                
-                # Add file path to violations
-                for violation in violations:
-                    violation['file'] = file_path
-                
-                all_violations.extend(violations)
+                try:
+                    # Analyze file
+                    metrics = analyze_java_file(file_path)
+                    evaluator = RuleEvaluator(rules, metrics)
+                    violations = evaluator.evaluate_all()
+                    
+                    # Add file path to violations
+                    for violation in violations:
+                        violation['file'] = file_path
+                    
+                    all_violations.extend(violations)
+                    success_count += 1
+                    
+                except Exception as file_error:
+                    # Log error but continue with other files
+                    failed_count += 1
+                    error_msg = str(file_error)
+                    # Truncate long error messages
+                    if len(error_msg) > 100:
+                        error_msg = error_msg[:100] + "..."
+                    failed_files.append({"file": file_path, "error": error_msg})
+                    print(f"Error analyzing {file_path}: {file_error}")
+                    continue
             
             if not self._is_cancelled:
-                self.finished.emit(all_violations)
+                stats = {
+                    "success": success_count,
+                    "failed": failed_count,
+                    "total": len(self.files),
+                    "failed_files": failed_files
+                }
+                self.finished.emit(all_violations, stats)
         
         except Exception as e:
             self.error.emit(str(e))
@@ -453,46 +479,26 @@ class MainWindow(QMainWindow):
         self.exclude_ext_input = QLineEdit()
         self.exclude_ext_input.setPlaceholderText(".txt, .md, .xml")
         self.exclude_ext_input.setText(".txt, .md, .xml, .properties, .gradle")
+        self.exclude_ext_input.textChanged.connect(self.on_exclusion_changed)
         files_layout.addWidget(self.exclude_ext_input)
         
         files_layout.addWidget(QLabel("Exclude Folder Names:"))
         self.exclude_folder_input = QLineEdit()
         self.exclude_folder_input.setPlaceholderText("target, build, .git")
         self.exclude_folder_input.setText("target, build, .git, .idea, node_modules")
+        self.exclude_folder_input.textChanged.connect(self.on_exclusion_changed)
         files_layout.addWidget(self.exclude_folder_input)
         
         files_layout.addWidget(QLabel("Exclude File Patterns:"))
         self.exclude_file_pattern = QLineEdit()
         self.exclude_file_pattern.setPlaceholderText("*Test.java, *IT.java")
+        self.exclude_file_pattern.textChanged.connect(self.on_exclusion_changed)
         files_layout.addWidget(self.exclude_file_pattern)
         
         apply_exclusions_btn = QPushButton("🔄 Apply Exclusions to Current Files")
         apply_exclusions_btn.setToolTip("Remove files matching exclusion patterns from the list")
         apply_exclusions_btn.clicked.connect(self.apply_exclusions_to_existing)
         files_layout.addWidget(apply_exclusions_btn)
-        
-        exclude_specific_layout = QHBoxLayout()
-        files_layout.addWidget(QLabel("Exclude Specific Paths:"))
-        
-        self.excluded_paths_list = QListWidget()
-        self.excluded_paths_list.setMaximumHeight(80)
-        exclude_specific_layout.addWidget(self.excluded_paths_list)
-        
-        exclude_btn_layout = QVBoxLayout()
-        add_exclude_file_btn = QPushButton("+ File")
-        add_exclude_file_btn.clicked.connect(self.add_exclude_file)
-        exclude_btn_layout.addWidget(add_exclude_file_btn)
-        
-        add_exclude_folder_btn = QPushButton("+ Folder")
-        add_exclude_folder_btn.clicked.connect(self.add_exclude_folder)
-        exclude_btn_layout.addWidget(add_exclude_folder_btn)
-        
-        remove_exclude_btn = QPushButton("- Remove")
-        remove_exclude_btn.clicked.connect(self.remove_exclude_path)
-        exclude_btn_layout.addWidget(remove_exclude_btn)
-        
-        exclude_specific_layout.addLayout(exclude_btn_layout)
-        files_layout.addLayout(exclude_specific_layout)
         
         tabs.addTab(files_tab, "Files")
         
@@ -702,6 +708,18 @@ class MainWindow(QMainWindow):
                 self.session_label.setText(f"Session: {session_name}")
                 self.statusBar().showMessage(f"Created new session: {session_name}")
     
+    def on_exclusion_changed(self):
+        """Auto-save session when exclusion settings change"""
+        if self.current_session:
+            self.update_session_data()
+            self.session_manager.save_session(self.current_session)
+    
+    def on_exclusion_changed(self):
+        """Auto-save session when exclusion settings change"""
+        if self.current_session:
+            self.update_session_data()
+            self.session_manager.save_session(self.current_session)
+    
     def save_current_session(self):
         if self.current_session:
             self.update_session_data()
@@ -751,12 +769,21 @@ class MainWindow(QMainWindow):
                 files.append({
                     "path": clean_path,
                     "hash": self.session_manager._get_file_hash(clean_path),
+                    "timestamp": os.path.getmtime(clean_path) if os.path.exists(clean_path) else None,
                     "last_scanned": None
                 })
         
         self.current_session['files'] = files
         self.current_session['rules_file'] = getattr(self, 'current_rules_file', '')
         self.current_session['last_results'] = self.violations
+        
+        # Save exclusion settings
+        exclusion_data = {
+            'exclude_extensions': self.exclude_ext_input.text(),
+            'exclude_folders': self.exclude_folder_input.text(),
+            'exclude_file_patterns': self.exclude_file_pattern.text()
+        }
+        self.current_session['exclusion_settings'] = exclusion_data
     
     def _prompt_session_name(self):
         """Prompt user to enter session name"""
@@ -768,13 +795,21 @@ class MainWindow(QMainWindow):
         )
     
     def load_session(self, session):
+        # Disconnect signals to prevent auto-save during load
+        self.exclude_ext_input.textChanged.disconnect(self.on_exclusion_changed)
+        self.exclude_folder_input.textChanged.disconnect(self.on_exclusion_changed)
+        self.exclude_file_pattern.textChanged.disconnect(self.on_exclusion_changed)
+        
         self.current_session = session
         self.session_label.setText(f"Session: {session['name']}")
         
         # Load files
         self.file_list.clear()
         for file_info in session.get('files', []):
-            self.file_list.addItem(file_info['path'])
+            item = QListWidgetItem(file_info['path'])
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            item.setCheckState(Qt.CheckState.Checked)
+            self.file_list.addItem(item)
         
         # Load rules
         rules_file = session.get('rules_file', '')
@@ -791,6 +826,17 @@ class MainWindow(QMainWindow):
         if session.get('last_results'):
             self.violations = session['last_results']
             self.display_results()
+        
+        # Load exclusion settings
+        exclusion_settings = session.get('exclusion_settings', {})
+        self.exclude_ext_input.setText(exclusion_settings.get('exclude_extensions', '.txt, .md, .xml, .properties, .gradle'))
+        self.exclude_folder_input.setText(exclusion_settings.get('exclude_folders', 'target, build, .git, .idea, node_modules'))
+        self.exclude_file_pattern.setText(exclusion_settings.get('exclude_file_patterns', ''))
+        
+        # Reconnect signals after load
+        self.exclude_ext_input.textChanged.connect(self.on_exclusion_changed)
+        self.exclude_folder_input.textChanged.connect(self.on_exclusion_changed)
+        self.exclude_file_pattern.textChanged.connect(self.on_exclusion_changed)
         
         # Check file changes
         self.check_file_changes()
@@ -855,63 +901,23 @@ class MainWindow(QMainWindow):
             self.add_files_to_list(files)
             self.statusBar().showMessage(f"Added {len(files)} file(s)")
     
-    def add_exclude_file(self):
-        files, _ = QFileDialog.getOpenFileNames(
-            self, "Select Files to Exclude", "", "All Files (*.*)"
-        )
-        
-        for file in files:
-            if file not in [self.excluded_paths_list.item(i).text() 
-                          for i in range(self.excluded_paths_list.count())]:
-                self.excluded_paths_list.addItem(file)
-    
-    def add_exclude_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, "Select Folder to Exclude")
-        
-        if folder:
-            if folder not in [self.excluded_paths_list.item(i).text() 
-                            for i in range(self.excluded_paths_list.count())]:
-                self.excluded_paths_list.addItem(folder)
-    
-    def remove_exclude_path(self):
-        for item in self.excluded_paths_list.selectedItems():
-            self.excluded_paths_list.takeItem(self.excluded_paths_list.row(item))
-    
     def add_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Folder")
         
         if folder:
-            # Get exclude patterns
-            exclude_exts = [ext.strip() for ext in self.exclude_ext_input.text().split(',')]
-            exclude_folder_names = [f.strip() for f in self.exclude_folder_input.text().split(',')]
+            # Get exclude patterns (filter out empty strings)
+            exclude_exts = [ext.strip() for ext in self.exclude_ext_input.text().split(',') if ext.strip()]
+            exclude_folder_names = [f.strip() for f in self.exclude_folder_input.text().split(',') if f.strip()]
             exclude_patterns = [p.strip() for p in self.exclude_file_pattern.text().split(',') if p.strip()]
             
             # Find all Java files
-            excluded_paths = [self.excluded_paths_list.item(i).text() 
-            for i in range(self.excluded_paths_list.count())]
-            
             java_files = []
             for root, dirs, files in os.walk(folder):
                 dirs[:] = [d for d in dirs if d not in exclude_folder_names]
                 
-                if root in excluded_paths:
-                    continue
-                
-                skip_folder = False
-                for excluded_path in excluded_paths:
-                    if os.path.isdir(excluded_path) and root.startswith(excluded_path):
-                        skip_folder = True
-                        break
-                
-                if skip_folder:
-                    continue
-                
                 for file in files:
                     if file.endswith('.java'):
                         file_path = os.path.join(root, file)
-                        
-                        if file_path in excluded_paths:
-                            continue
                         
                         skip = False
                         
@@ -1082,7 +1088,7 @@ class MainWindow(QMainWindow):
         self.progress_bar.setValue(progress)
         self.progress_label.setText(f"Analyzing {current}/{total}: {os.path.basename(file)}")
     
-    def on_analysis_finished(self, violations):
+    def on_analysis_finished(self, violations, stats):
         self.violations = violations
         self.display_results()
         
@@ -1104,7 +1110,32 @@ class MainWindow(QMainWindow):
         self.analyze_btn.setEnabled(True)
         self.cancel_btn.setVisible(False)
         self.update_file_count_display()
-        self.statusBar().showMessage(f"Analysis complete: {len(violations)} violations found")
+        
+        # Show summary with success/failed counts
+        success_count = stats['success']
+        failed_count = stats['failed']
+        total_count = stats['total']
+        
+        if failed_count > 0:
+            status_msg = f"Analysis complete: {success_count}/{total_count} files analyzed successfully, {failed_count} failed - {len(violations)} violations found"
+            
+            # Show failed files dialog
+            failed_files = stats.get('failed_files', [])
+            if failed_files:
+                msg = f"{failed_count} file(s) failed to analyze:\n\n"
+                for item in failed_files[:10]:  # Show max 10
+                    filename = os.path.basename(item['file'])
+                    error = item['error']
+                    msg += f"• {filename}\n  Error: {error}\n\n"
+                
+                if len(failed_files) > 10:
+                    msg += f"... and {len(failed_files) - 10} more files"
+                
+                QMessageBox.warning(self, "Analysis Warnings", msg)
+        else:
+            status_msg = f"Analysis complete: {len(violations)} violations found in {total_count} files"
+        
+        self.statusBar().showMessage(status_msg)
     
     def on_analysis_error(self, error):
         QMessageBox.critical(self, "Analysis Error", f"Error during analysis:\n{error}")
@@ -1350,11 +1381,6 @@ class MainWindow(QMainWindow):
         exclude_folders = [folder.strip() for folder in self.exclude_folder_input.text().split(',') if folder.strip()]
         exclude_patterns = [pat.strip() for pat in self.exclude_file_pattern.text().split(',') if pat.strip()]
         
-        # Get specific excluded paths
-        excluded_paths = []
-        for i in range(self.excluded_paths_list.count()):
-            excluded_paths.append(self.excluded_paths_list.item(i).text())
-        
         # Check each file
         files_to_remove = []
         for i in range(self.file_list.count()):
@@ -1365,10 +1391,6 @@ class MainWindow(QMainWindow):
             
             # Check if should be excluded
             should_exclude = False
-            
-            # Check specific paths
-            if file_path in excluded_paths:
-                should_exclude = True
             
             # Check extensions
             if any(file_name.endswith(ext) for ext in exclude_exts):
@@ -1682,33 +1704,9 @@ class MainWindow(QMainWindow):
         try:
             session = self.session_manager.load_session(name)
             if session:
-                self.current_session = session
-                self.session_label.setText(f"Session: {name}")
-                
-                # Load files
-                self.file_list.clear()
-                for file_info in session.get('files', []):
-                    file_path = file_info['path']
-                    if os.path.exists(file_path):
-                        item = QListWidgetItem(file_path)
-                        item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-                        item.setCheckState(Qt.CheckState.Checked)
-                        item.setToolTip(file_path)
-                        self.file_list.addItem(item)
-                
-                # Load rules if exists
-                if session.get('rules_file') and os.path.exists(session['rules_file']):
-                    self.load_rules_from_file(session['rules_file'])
-                
-                # Load file filters
-                filters = session.get('file_filters', {})
-                self.exclude_ext_input.setText(filters.get('exclude_ext', ''))
-                self.exclude_folder_input.setText(filters.get('exclude_folder', ''))
-                self.exclude_file_pattern.setText(filters.get('exclude_pattern', ''))
-                
-                self.check_file_changes()
+                # Use the main load_session method to ensure all settings are loaded correctly
+                self.load_session(session)
                 self.update_file_count_display()
-                self.statusBar().showMessage(f"Loaded session: {name}")
         except Exception as e:
             QMessageBox.critical(self, "Load Error", f"Failed to load session:\n{str(e)}")
     
@@ -1793,6 +1791,11 @@ class MainWindow(QMainWindow):
     
     def load_settings(self):
         """Load saved settings"""
+        # Disconnect signals to prevent auto-save during load
+        self.exclude_ext_input.textChanged.disconnect(self.on_exclusion_changed)
+        self.exclude_folder_input.textChanged.disconnect(self.on_exclusion_changed)
+        self.exclude_file_pattern.textChanged.disconnect(self.on_exclusion_changed)
+        
         # Load exclude patterns
         exclude_ext = self.settings.value("exclude_extensions")
         if exclude_ext:
@@ -1805,6 +1808,11 @@ class MainWindow(QMainWindow):
         exclude_patterns = self.settings.value("exclude_patterns")
         if exclude_patterns:
             self.exclude_file_pattern.setText(exclude_patterns)
+        
+        # Reconnect signals after load
+        self.exclude_ext_input.textChanged.connect(self.on_exclusion_changed)
+        self.exclude_folder_input.textChanged.connect(self.on_exclusion_changed)
+        self.exclude_file_pattern.textChanged.connect(self.on_exclusion_changed)
     
     def save_settings(self):
         """Save current settings"""

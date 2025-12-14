@@ -1,0 +1,326 @@
+{
+  "name": "full test case",
+  "created_at": "2025-12-14T18:55:55.180312",
+  "last_updated": "2025-12-14T22:56:20.366757",
+  "rules_file": "examples/rules.dsl",
+  "files": [
+    {
+      "path": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\CleanOrderService.java",
+      "hash": "e812918704c31c590d92ea6ebc441497",
+      "timestamp": 1765698108.6453264,
+      "last_scanned": "2025-12-14T22:44:35.460215"
+    },
+    {
+      "path": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\InventoryManager.java",
+      "hash": "4239e91b9bcb555cc4dc5860c06829f8",
+      "timestamp": 1765713205.8050122,
+      "last_scanned": "2025-12-14T22:44:35.461724"
+    },
+    {
+      "path": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\NotificationService.java",
+      "hash": "b638da54084a5b05fabb0b0da8961085",
+      "timestamp": 1765713205.804011,
+      "last_scanned": "2025-12-14T22:44:35.462962"
+    },
+    {
+      "path": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\OrderService.java",
+      "hash": "95ed292b34f87e334516765d51bba174",
+      "timestamp": 1765712988.2702055,
+      "last_scanned": "2025-12-14T22:44:35.463687"
+    },
+    {
+      "path": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\PaymentProcessor.java",
+      "hash": "fc24210b020b0b39c5d6661ddbbb86a0",
+      "timestamp": 1765713205.800012,
+      "last_scanned": "2025-12-14T22:44:35.464315"
+    },
+    {
+      "path": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\Sample.java",
+      "hash": "4f653047ad2ae554226e0e29cee2f7e8",
+      "timestamp": 1765713876.980486,
+      "last_scanned": "2025-12-14T22:44:35.464906"
+    },
+    {
+      "path": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\UserRepository.java",
+      "hash": "03e53f5224801acc6c451e6f4d5e22e6",
+      "timestamp": 1765713205.800012,
+      "last_scanned": "2025-12-14T22:44:35.465527"
+    },
+    {
+      "path": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\temp\\CleanOrderService.java",
+      "hash": "e812918704c31c590d92ea6ebc441497",
+      "timestamp": 1763429661.27941,
+      "last_scanned": "2025-12-14T22:44:35.466117"
+    }
+  ],
+  "file_filters": {},
+  "last_results": [
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\InventoryManager.java",
+      "line": 6,
+      "message": "Method addProduct memiliki 7 parameter, maksimal 4",
+      "name": "addProduct",
+      "rule": "TooManyParameters",
+      "severity": "error",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\InventoryManager.java",
+      "line": 20,
+      "message": "Nesting terlalu dalam di method updateStock",
+      "name": "updateStock",
+      "rule": "DeepNesting",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\InventoryManager.java",
+      "line": 37,
+      "message": "Method generateReport memiliki 11 variabel, maksimal 8",
+      "name": "generateReport",
+      "rule": "TooManyVariables",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\InventoryManager.java",
+      "line": 6,
+      "message": "Method addProduct memanggil 7 method lain, maksimal 3",
+      "name": "addProduct",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\InventoryManager.java",
+      "line": 20,
+      "message": "Method updateStock memanggil 8 method lain, maksimal 3",
+      "name": "updateStock",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\InventoryManager.java",
+      "line": 37,
+      "message": "Method generateReport memanggil 10 method lain, maksimal 3",
+      "name": "generateReport",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\InventoryManager.java",
+      "line": 64,
+      "message": "Method quickCheck memanggil 6 method lain, maksimal 3",
+      "name": "quickCheck",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\InventoryManager.java",
+      "line": 78,
+      "message": "Method processOrder memanggil 9 method lain, maksimal 3",
+      "name": "processOrder",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\NotificationService.java",
+      "line": 6,
+      "message": "Method sendEmail memanggil 5 method lain, maksimal 3",
+      "name": "sendEmail",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\NotificationService.java",
+      "line": 16,
+      "message": "Method sendSms memanggil 4 method lain, maksimal 3",
+      "name": "sendSms",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\NotificationService.java",
+      "line": 25,
+      "message": "Method sendPushNotification memanggil 5 method lain, maksimal 3",
+      "name": "sendPushNotification",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\OrderService.java",
+      "line": 2,
+      "message": "Method processOrder memiliki 5 parameter, maksimal 4",
+      "name": "processOrder",
+      "rule": "TooManyParameters",
+      "severity": "error",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\OrderService.java",
+      "line": 2,
+      "message": "Nesting terlalu dalam di method processOrder",
+      "name": "processOrder",
+      "rule": "DeepNesting",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\OrderService.java",
+      "line": 2,
+      "message": "Method processOrder memiliki 10 variabel, maksimal 8",
+      "name": "processOrder",
+      "rule": "TooManyVariables",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\OrderService.java",
+      "line": 2,
+      "message": "Method processOrder memanggil 5 method lain, maksimal 3",
+      "name": "processOrder",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\PaymentProcessor.java",
+      "line": 4,
+      "message": "Method processPayment memiliki 6 parameter, maksimal 4",
+      "name": "processPayment",
+      "rule": "TooManyParameters",
+      "severity": "error",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\PaymentProcessor.java",
+      "line": 13,
+      "message": "Nesting terlalu dalam di method validateTransaction",
+      "name": "validateTransaction",
+      "rule": "DeepNesting",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\PaymentProcessor.java",
+      "line": 28,
+      "message": "Method generateReceipt memiliki 11 variabel, maksimal 8",
+      "name": "generateReceipt",
+      "rule": "TooManyVariables",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\PaymentProcessor.java",
+      "line": 13,
+      "message": "Method validateTransaction memanggil 7 method lain, maksimal 3",
+      "name": "validateTransaction",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\PaymentProcessor.java",
+      "line": 28,
+      "message": "Method generateReceipt memanggil 16 method lain, maksimal 3",
+      "name": "generateReceipt",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\Sample.java",
+      "line": 2,
+      "message": "Method processOrder memiliki 5 parameter, maksimal 4",
+      "name": "processOrder",
+      "rule": "TooManyParameters",
+      "severity": "error",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\Sample.java",
+      "line": 2,
+      "message": "Nesting terlalu dalam di method processOrder",
+      "name": "processOrder",
+      "rule": "DeepNesting",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\Sample.java",
+      "line": 2,
+      "message": "Method processOrder memiliki 10 variabel, maksimal 8",
+      "name": "processOrder",
+      "rule": "TooManyVariables",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\Sample.java",
+      "line": 2,
+      "message": "Method processOrder memanggil 5 method lain, maksimal 3",
+      "name": "processOrder",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\UserRepository.java",
+      "line": 21,
+      "message": "Method searchUsers memiliki 5 parameter, maksimal 4",
+      "name": "searchUsers",
+      "rule": "TooManyParameters",
+      "severity": "error",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\UserRepository.java",
+      "line": 21,
+      "message": "Method searchUsers memiliki 14 variabel, maksimal 8",
+      "name": "searchUsers",
+      "rule": "TooManyVariables",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\UserRepository.java",
+      "line": 4,
+      "message": "Method findById memanggil 9 method lain, maksimal 3",
+      "name": "findById",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\UserRepository.java",
+      "line": 21,
+      "message": "Method searchUsers memanggil 11 method lain, maksimal 3",
+      "name": "searchUsers",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    },
+    {
+      "file": "C:/Users/ihsan/Documents/GitHub/Quality-Code-Checker\\examples\\UserRepository.java",
+      "line": 49,
+      "message": "Method createUser memanggil 9 method lain, maksimal 3",
+      "name": "createUser",
+      "rule": "TooManyMethodCalls",
+      "severity": "warning",
+      "target": "method"
+    }
+  ],
+  "last_analysis": "2025-12-14T22:44:35.466136",
+  "exclusion_settings": {
+    "exclude_extensions": ".txt",
+    "exclude_folders": "grammar",
+    "exclude_file_patterns": ""
+  }
+}
