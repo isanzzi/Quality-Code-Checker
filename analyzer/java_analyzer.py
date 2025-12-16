@@ -23,7 +23,7 @@ class JavaAnalyzer:
             )
             self.metrics.classes.append(class_metrics)
             
-            # Analyze methods in class
+            # Analyze functions/methods in class
             if node.methods:
                 for method in node.methods:
                     self._analyze_method(method)
@@ -34,7 +34,7 @@ class JavaAnalyzer:
                     self._analyze_field(field)
     
     def _analyze_method(self, method_node):
-        """Analyze a single method"""
+        """Analyze a single function/method from Java code"""
         is_public = 'public' in [m for m in method_node.modifiers] if method_node.modifiers else False
         
         method_metrics = MethodMetrics(

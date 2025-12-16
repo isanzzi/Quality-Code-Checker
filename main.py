@@ -56,7 +56,7 @@ def run_cli():
     
     print(f"🔍 Analyzing Java code: {java_file}")
     metrics = analyze_java_file(java_file)
-    print(f"✅ Found {len(metrics.methods)} methods, {len(metrics.classes)} classes, {len(metrics.variables)} variables\n")
+    print(f"✅ Found {len(metrics.methods)} functions, {len(metrics.classes)} classes, {len(metrics.variables)} variables\n")
     
     print("⚙️  Evaluating rules...")
     evaluator = RuleEvaluator(rules, metrics)
