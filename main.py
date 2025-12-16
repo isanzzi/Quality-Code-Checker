@@ -50,13 +50,27 @@ def run_cli():
     dsl_file = sys.argv[1]
     java_file = sys.argv[2]
     
+    # Parse DSL with error handling
     print(f"📖 Parsing DSL rules from: {dsl_file}")
-    rules = parse_dsl_file(dsl_file)
-    print(f"✅ Loaded {len(rules)} rules\n")
+    try:
+        rules = parse_dsl_file(dsl_file)
+        print(f"✅ Loaded {len(rules)} rules\n")
+    except Exception as e:
+        print(f"\n{str(e)}")
+        print("\n💡 Please fix the DSL file and try again.")
+        sys.exit(1)
     
+    # Analyze Java code with error handling
     print(f"🔍 Analyzing Java code: {java_file}")
-    metrics = analyze_java_file(java_file)
-    print(f"✅ Found {len(metrics.methods)} functions, {len(metrics.classes)} classes, {len(metrics.variables)} variables\n")
+    try:
+        metrics = analyze_java_file(java_file)
+        print(f"✅ Found {len(metrics.methods)} functions, {len(metrics.classes)} classes, {len(metrics.variables)} variables\n")
+    except FileNotFoundError:
+        print(f"❌ Java file not found: {java_file}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Error analyzing Java code: {str(e)}")
+        sys.exit(1)
     
     print("⚙️  Evaluating rules...")
     evaluator = RuleEvaluator(rules, metrics)
